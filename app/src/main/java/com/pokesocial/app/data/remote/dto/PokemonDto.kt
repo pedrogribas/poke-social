@@ -45,3 +45,14 @@ data class NamedResourceDto(
     val name: String,
     val url: String
 )
+
+data class TypeDetailDto(
+    val id: Int,
+    val name: String,
+    val pokemon: List<TypePokemonEntryDto> = emptyList()
+)
+
+data class TypePokemonEntryDto(
+    val pokemon: NamedResourceDto,
+    val slot: Int = 1
+)

@@ -103,4 +103,19 @@ class FeedViewModel(
             }
         }
     }
+
+    fun toggleBookmark(postId: String) {
+        viewModelScope.launch {
+            val updated = repo.toggleBookmark(postId) ?: return@launch
+            _ui.update { st ->
+                st.copy(posts = st.posts.map { if (it.id == postId) updated else it })
+            }
+        }
+    }
+
+    fun sharePost(conversationId: String, post: Post) {
+        viewModelScope.launch {
+            repo.sharePostToConversation(conversationId, post)
+        }
+    }
 }

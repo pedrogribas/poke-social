@@ -2,7 +2,19 @@
 
 Rede social no estilo Instagram, feita em **Kotlin + Jetpack Compose**, onde você é o **Lucario** (`@lucar_10`) e o feed é povoado pela Gen 1 da [PokeAPI](https://pokeapi.co/).
 
-Na primeira abertura o app baixa a Pokédex, persiste tudo no **Room** e gera posts, stories, comentários e conversas. Depois disso funciona offline (exceto mídias remotas).
+Na primeira abertura o app baixa a Pokédex, persiste tudo no **Room** e gera posts, stories, comentários, curtidas, músicas e conversas com mídia local. Depois disso funciona offline.
+
+---
+
+## Screenshots
+
+| Feed | Perfil | Reels |
+|:---:|:---:|:---:|
+| ![Feed](docs/screenshots/01-feed.png) | ![Perfil](docs/screenshots/02-profile.png) | ![Reels](docs/screenshots/03-reels.png) |
+
+| Chat | Batalha no DM | Chat (Mewtwo) |
+|:---:|:---:|:---:|
+| ![Chat](docs/screenshots/04-chat.png) | ![Batalha](docs/screenshots/05-battle.png) | ![Mewtwo](docs/screenshots/06-chat-mewtwo.png) |
 
 ---
 
@@ -10,12 +22,13 @@ Na primeira abertura o app baixa a Pokédex, persiste tudo no **Room** e gera po
 
 | Área | O que faz |
 |------|-----------|
-| **Feed** | Stories, likes, double-tap, bookmark, comentários e scroll infinito |
-| **Explore** | Grade aleatória de posts |
-| **Reels** | Vídeos sample com player Media3 |
-| **Inbox** | DMs com resposta automática |
-| **Perfil** | Conta fixa do Lucario (#448) |
-| **UI** | Chrome visual inspirado no Instagram (claro/escuro) |
+| **Feed** | Stories, likes reais, zoom em fotos, música, menções, repost, bookmark |
+| **Explore** | Grade e busca por hashtag |
+| **Reels** | Player Media3, hold nos cantos = 2x, repost e share via DM |
+| **Inbox** | DMs com GIFs, reações, respostas automáticas e mini-batalha |
+| **Perfil** | Lucario (#448), highlights, grid e lista de seguidores |
+| **Curtidas** | Contagem real + tela com quem curtiu |
+| **UI** | Chrome inspirado no Instagram (header, stories, reels) |
 
 Usuário fixo: **`lucar_10`** · Lucario · Pokémon #448
 
@@ -25,12 +38,12 @@ Usuário fixo: **`lucar_10`** · Lucario · Pokémon #448
 
 - **UI:** Jetpack Compose + Material 3 + Navigation
 - **Arquitetura:** MVVM + repository
-- **Local:** Room (KSP)
-- **Rede:** Retrofit + Moshi (PokeAPI)
-- **Imagens:** Coil + artwork oficial / Picsum
+- **Local:** Room (KSP) + assets de mídia
+- **Rede:** Retrofit + Moshi (PokeAPI — avatares)
+- **Imagens:** Coil
 - **Vídeo:** Media3 ExoPlayer
 
-**Requisitos:** Android 8.0+ (API 26) · internet na 1ª abertura
+**Requisitos:** Android 8.0+ (API 26) · internet na 1ª abertura (PokeAPI)
 
 ---
 
@@ -38,6 +51,13 @@ Usuário fixo: **`lucar_10`** · Lucario · Pokémon #448
 
 ```bash
 ./gradlew :app:installDebug
+adb shell am start -n com.pokesocial.app/.MainActivity
+```
+
+Para forçar reseed (limpar dados):
+
+```bash
+adb shell pm clear com.pokesocial.app
 adb shell am start -n com.pokesocial.app/.MainActivity
 ```
 
@@ -66,9 +86,9 @@ Notas de versão: [CHANGELOG.md](./CHANGELOG.md) · [Releases no GitHub](https:/
 
 ```
 app/src/main/java/com/pokesocial/app/
-├── core/           # constantes (Lucario, seeds, URLs)
+├── core/           # constantes, mídia local, chat brain, batalha
 ├── data/
-│   ├── local/      # Room + SeedManager (Gen 1)
+│   ├── local/      # Room + SeedManager + ContentThemes
 │   ├── remote/     # PokeAPI (Retrofit)
 │   └── repository/ # SocialRepository
 ├── domain/model/   # User, Post, Story, Chat…
@@ -79,4 +99,4 @@ app/src/main/java/com/pokesocial/app/
 
 ## Aviso
 
-Projeto **educacional / demonstração**. Não afiliado à Nintendo, The Pokémon Company ou Meta. Sprites e nomes de Pokémon vêm da PokeAPI; fotos de posts usam Picsum; vídeos de sample são de buckets públicos de demonstração.
+Projeto **educacional / demonstração**. Não afiliado à Nintendo, The Pokémon Company ou Meta. Sprites e nomes de Pokémon vêm da PokeAPI; fotos/vídeos de posts usam assets empacotados e amostras públicas.

@@ -15,7 +15,8 @@ data class ExploreUi(
     val loading: Boolean = true,
     val posts: List<Post> = emptyList(),
     val query: String = "",
-    val users: List<User> = emptyList()
+    val users: List<User> = emptyList(),
+    val hashtagPosts: List<Post> = emptyList()
 )
 
 class ExploreViewModel(private val repo: SocialRepository) : ViewModel() {
@@ -37,7 +38,20 @@ class ExploreViewModel(private val repo: SocialRepository) : ViewModel() {
     fun onQuery(q: String) {
         _ui.update { it.copy(query = q) }
         viewModelScope.launch {
-            _ui.update { it.copy(users = repo.searchUsers(q)) }
+            val users = repo.searchUsers(q.removePrefix("#"))
+            val hashtagPosts = if (q.contains('#')) {
+                repo.searchPostsByCaption(if (q.startsWith("#")) q else "#$q")
+            } else if (q.isNotBlank()) {
+                repo.searchPostsByCaption(q)
+            } else {
+                emptyList()
+            }
+            _ui.update { it.copy(users = users, hashtagPosts = hashtagPosts) }
         }
+    }
+
+    fun openHashtag(tag: String) {
+        val normalized = if (tag.startsWith("#")) tag else "#$tag"
+        onQuery(normalized)
     }
 }

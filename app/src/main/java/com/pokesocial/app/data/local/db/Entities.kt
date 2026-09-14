@@ -21,7 +21,33 @@ data class UserEntity(
     val bio: String,
     val followers: Int,
     val following: Int,
-    val isMe: Boolean = false
+    val isMe: Boolean = false,
+    /** Comma-separated Pokémon types, e.g. "fighting,steel" */
+    val types: String = ""
+)
+
+@Entity(
+    tableName = "follows",
+    primaryKeys = ["followerId", "followeeId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["followerId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["followeeId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("followeeId"), Index("followerId")]
+)
+data class FollowEntity(
+    val followerId: String,
+    val followeeId: String
 )
 
 @Entity(
@@ -40,10 +66,15 @@ data class PostEntity(
     @PrimaryKey val id: String,
     val authorId: String,
     val caption: String,
-    val mediaType: String, // IMAGE | CAROUSEL | VIDEO
+    val mediaType: String,
     val createdAt: Long,
     val likeCount: Int,
-    val commentCount: Int
+    val commentCount: Int,
+    val musicTitle: String? = null,
+    val musicArtist: String? = null,
+    val showMusicLabel: Boolean = true,
+    /** Original post id when this is a repost */
+    val originalPostId: String? = null
 )
 
 @Entity(
@@ -63,7 +94,59 @@ data class PostMediaEntity(
     val postId: String,
     val url: String,
     val position: Int,
-    val type: String // IMAGE | VIDEO
+    val type: String
+)
+
+@Entity(
+    tableName = "media_tags",
+    primaryKeys = ["mediaId", "userId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = PostMediaEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["mediaId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("mediaId"), Index("userId")]
+)
+data class MediaTagEntity(
+    val mediaId: String,
+    val userId: String,
+    /** Normalized 0..1 position on the media */
+    val x: Float,
+    val y: Float
+)
+
+@Entity(
+    tableName = "reposts",
+    primaryKeys = ["postId", "userId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = PostEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["postId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("userId")]
+)
+data class RepostEntity(
+    val postId: String,
+    val userId: String,
+    val createdAt: Long
 )
 
 @Entity(
@@ -89,7 +172,8 @@ data class CommentEntity(
     val postId: String,
     val authorId: String,
     val text: String,
-    val createdAt: Long
+    val createdAt: Long,
+    val mediaUrl: String? = null
 )
 
 @Entity(
@@ -127,7 +211,11 @@ data class StoryEntity(
     val authorId: String,
     val mediaUrl: String,
     val createdAt: Long,
-    val seenByMe: Boolean = false
+    val seenByMe: Boolean = false,
+    val likedByMe: Boolean = false,
+    val musicTitle: String? = null,
+    val musicArtist: String? = null,
+    val showMusicLabel: Boolean = true
 )
 
 @Entity(tableName = "conversations")
@@ -135,7 +223,10 @@ data class ConversationEntity(
     @PrimaryKey val id: String,
     val peerUserId: String,
     val updatedAt: Long,
-    val unreadCount: Int = 0
+    val unreadCount: Int = 0,
+    /** PRIMARY | GENERAL | REQUESTS | ARCHIVED */
+    val folder: String = "PRIMARY",
+    val isPinned: Boolean = false
 )
 
 @Entity(
@@ -155,5 +246,93 @@ data class MessageEntity(
     val conversationId: String,
     val senderId: String,
     val text: String,
+    val createdAt: Long,
+    val mediaUrl: String? = null,
+    val reaction: String? = null
+)
+
+@Entity(
+    tableName = "notifications",
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["actorUserId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("actorUserId"), Index("createdAt")]
+)
+data class NotificationEntity(
+    @PrimaryKey val id: String,
+    /** LIKE | FOLLOW | COMMENT | STORY_REPLY */
+    val type: String,
+    val actorUserId: String,
+    val postId: String? = null,
+    val text: String,
+    val createdAt: Long,
+    val seen: Boolean = false
+)
+
+@Entity(
+    tableName = "highlights",
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("userId")]
+)
+data class HighlightEntity(
+    @PrimaryKey val id: String,
+    val userId: String,
+    val title: String,
+    val coverUrl: String,
+    /** Comma-separated media URLs */
+    val mediaUrls: String,
     val createdAt: Long
+)
+
+@Entity(
+    tableName = "notes",
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
+data class NoteEntity(
+    @PrimaryKey val userId: String,
+    val text: String,
+    val updatedAt: Long
+)
+
+@Entity(
+    tableName = "bookmarks",
+    primaryKeys = ["postId", "userId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = PostEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["postId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("userId")]
+)
+data class BookmarkEntity(
+    val postId: String,
+    val userId: String
 )

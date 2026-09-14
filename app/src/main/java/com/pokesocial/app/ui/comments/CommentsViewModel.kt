@@ -33,4 +33,11 @@ class CommentsViewModel(
             _draft.value = ""
         }
     }
+
+    fun sendGif(url: String) {
+        viewModelScope.launch {
+            repo.addComment(postId, "", mediaUrl = url)
+            _draft.value = ""
+        }
+    }
 }

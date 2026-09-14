@@ -9,25 +9,39 @@ import androidx.room.RoomDatabase
     entities = [
         MetaEntity::class,
         UserEntity::class,
+        FollowEntity::class,
         PostEntity::class,
         PostMediaEntity::class,
+        MediaTagEntity::class,
+        RepostEntity::class,
         CommentEntity::class,
         LikeEntity::class,
         StoryEntity::class,
         ConversationEntity::class,
-        MessageEntity::class
+        MessageEntity::class,
+        NoteEntity::class,
+        BookmarkEntity::class,
+        NotificationEntity::class,
+        HighlightEntity::class
     ],
-    version = 1,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun metaDao(): MetaDao
     abstract fun userDao(): UserDao
+    abstract fun followDao(): FollowDao
     abstract fun postDao(): PostDao
     abstract fun likeDao(): LikeDao
     abstract fun commentDao(): CommentDao
     abstract fun storyDao(): StoryDao
     abstract fun chatDao(): ChatDao
+    abstract fun noteDao(): NoteDao
+    abstract fun bookmarkDao(): BookmarkDao
+    abstract fun notificationDao(): NotificationDao
+    abstract fun highlightDao(): HighlightDao
+    abstract fun mediaTagDao(): MediaTagDao
+    abstract fun repostDao(): RepostDao
 
     companion object {
         @Volatile private var instance: AppDatabase? = null

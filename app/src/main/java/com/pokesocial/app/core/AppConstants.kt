@@ -6,7 +6,7 @@ object AppConstants {
     const val ME_DISPLAY_NAME = "Lucario"
     const val ME_POKEMON_ID = 448
     const val FEED_PAGE_SIZE = 8
-    const val META_SEEDED = "seeded_v2"
+    const val META_SEEDED = "seeded_v13"
 
     fun artworkUrl(pokemonId: Int): String =
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokemonId.png"
